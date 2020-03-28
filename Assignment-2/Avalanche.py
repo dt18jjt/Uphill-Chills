@@ -49,23 +49,35 @@ class Game:
             self.events()
             self.update()
             self.draw()
-        while not self.playing:
-            self.overScreen()
+        #while not self.playing:
+            #self.overScreen()
 
     def update(self):
         self.all_sprites.update()
+        # player on normal platform
         hits = pg.sprite.spritecollide(self.player, self.platforms, False)
         if hits:
             self.player.pos.y = hits[0].rect.top
             self.player.vel.y = -0.12
+        # player on snow platform
         snowhits = pg.sprite.spritecollide(self.player, self.snowPlatforms, False)
-        if snowhits:
-            self.player.pos.y = snowhits[0].rect.top
-            self.player.vel.y = 0
+        for snow in self.snowPlatforms:
+            if snowhits and snow.rect.y == self.player.pos.y:
+                self.player.pos.y = snowhits[0].rect.top
+                self.player.vel.y = 0
+                snow.kill()
+        # player on ice platform
         icehits = pg.sprite.spritecollide(self.player, self.icePlatforms, False)
         if icehits:
             self.player.pos.y = icehits[0].rect.top
             self.player.vel.y = 0
+            # if player reaches top 1/4 of screen
+        if self.player.rect.top <= HEIGHT / 4:
+            self.player.pos.y += abs(self.player.vel.y)
+            for plat in self.allPlatforms:
+                plat.rect.y += abs(self.player.vel.y)
+                if plat.rect.top >= HEIGHT:
+                    plat.kill()
 
 
     def events(self):
@@ -101,7 +113,6 @@ g = Game()
 
 while g.running:
     g.new()
-
 pg.quit()
 
 
