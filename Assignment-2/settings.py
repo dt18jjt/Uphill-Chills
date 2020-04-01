@@ -1,14 +1,15 @@
 import pygame as pg, sys
+import random
 PLAY = True
 
 PLAYER_ACC = 0.5
 PLAYER_FRICTION = -0.12
 PLAYER_GRAV = 1
-PLAYER_JSTR = -30
-DASH_COUNT = 1
+PLAYER_JSTR = -20
+DASH_COUNT = 5
 DASH_TIMER = 0
 DASH_STR = 5
-
+FONT_NAME = 'Impact'
 WIDTH = 360
 HEIGHT = 600
 RED = (255, 0, 0)
@@ -23,7 +24,9 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 
 LEVEL = 1
-PLATFORM_LIST = [(0, HEIGHT - 100, 150, 20), (270, HEIGHT - 100, 100, 20), (0, HEIGHT - 250, 100, 20),
-                 (50, HEIGHT - 400, 100, 20), (200, HEIGHT - 500, 100, 20)]
-SNOW_LIST = [(150, HEIGHT - 100, 50, 20, 1), (100, HEIGHT - 250, 50, 20, 1)]
-ICE_LIST = [(200, HEIGHT - 200, 100, 20)]
+PLATFORM_LIST = [(0, HEIGHT - 50, 150, 20), (270, HEIGHT - 50, 100, 20), (0, HEIGHT - 200, 100, 20),
+                 (300, HEIGHT - 200, 100, 20),(50, HEIGHT - 350, 100, 20), (200, HEIGHT - 450, 100, 20),
+                 (100, HEIGHT - 550, 100, 20),(300, HEIGHT - 700, 100, 20)]
+SNOW_LIST = [(150, HEIGHT - 50, 50, 20), (100, HEIGHT - 200, 50, 20)]
+ICE_LIST = [(200, HEIGHT - 150, 100, 20)]
+FLAKE_LIST = [(random.randrange(10, WIDTH - 10), 0)]
