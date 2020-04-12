@@ -1,6 +1,7 @@
 from settings import *
-import random
 import pygame as pg, sys
+import random
+import time
 vec = pg.math.Vector2
 
 
@@ -18,8 +19,11 @@ class Player(pg.sprite.Sprite):
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
         self.dash = 5
-        self.cooldown = 0
         self.frozen = False
+        self.frozentime = 0
+        self.frozencooldown = 1000
+        self.dashlast = pg.time.get_ticks()
+        self.dashcooldown = 1000
 
     def jump(self):
         # jump only if standing on a platform
@@ -35,9 +39,11 @@ class Player(pg.sprite.Sprite):
         global DASH_TIMER
         global DASH_STR
         global PLAYER_ACC
+        global PLAYER_JSTR
         self.acc = vec(0, PLAYER_GRAV)
         keys = pg.key.get_pressed()
         slide = pg.sprite.spritecollide(self, self.game.icePlatforms, False)
+        now = pg.time.get_ticks()
         # if the player is on a ice platform the friction is reduced making it slide
         if slide:
             PLAYER_FRICTION = 0
@@ -47,19 +53,20 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_LEFT]:
             PLAYER_ACC = 0.5
             self.acc.x = -PLAYER_ACC
-            if keys[pg.K_SPACE] and self.dash > 0 and self.cooldown == 0:
-                self.cooldown = 1
+            if keys[pg.K_SPACE] and self.dash > 0 and now - self.dashlast >= self.dashcooldown:
                 self.dash -= 1
                 PLAYER_ACC = DASH_STR
                 self.acc.x = -PLAYER_ACC
+                self.dashlast = now
         # moves to the right
         if keys[pg.K_RIGHT]:
             PLAYER_ACC = 0.5
             self.acc.x = PLAYER_ACC
-            if keys[pg.K_SPACE] and self.dash > 0:
+            if keys[pg.K_SPACE] and self.dash > 0 and now - self.dashlast >= self.dashcooldown:
                 self.dash -= 1
                 PLAYER_ACC = DASH_STR
                 self.acc.x = PLAYER_ACC
+                self.dashlast = now
         if keys[pg.K_UP]:
             self.jump()
         # apply friction
@@ -75,19 +82,20 @@ class Player(pg.sprite.Sprite):
             self.pos.x = 15
         if self.pos.y <= 0:
             self.game.playing = False
-        # wrap around the sides of the screen
+        # when frozen
+        if time.time() - self.frozentime > 2:
+            self.image.fill(RED)
+            PLAYER_ACC = 0.5
+            PLAYER_JSTR = -25
+        else:
+            self.image.fill(BLUE)
+            PLAYER_ACC = 0.2
+            PLAYER_JSTR = -15
+            # wrap around the sides of the screen
         #if self.pos.x > WIDTH:
             #self.pos.x = 0
         #if self.pos.x < 0:
             #self.pos.x = WIDTH
-
-    def dashing(self):
-        # dash countdown
-        while self.dash <= 0:
-            self.cooldown += 0.01
-            if self.cooldown >= 10:
-                self.dash += 1
-                self.cooldown = 0
 
 
 # Class for normal platforms
@@ -136,7 +144,7 @@ class Freeze(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (random.randrange(10, WIDTH - 10), 0)
         self.pos = vec(random.randrange(10, WIDTH - 10), 10)
-        self.speed = random.randrange(5, 10)
+        self.speed = 5
 
     def fall(self):
         self.rect.center = self.pos
@@ -154,15 +162,26 @@ class Pile(pg.sprite.Sprite):
         global vec
         pg.sprite.Sprite.__init__(self)
         self.height = 150
-        self.image = pg.Surface((WIDTH, self.height))
-        self.image.fill(WHITE)
+        self.image = pg.Surface((WIDTH, HEIGHT))
+        self.image.fill(GREY)
         self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 2, HEIGHT + 100)
-        self.pos = vec(0, HEIGHT + 100)
+        self.pos = vec(WIDTH / 2, HEIGHT + 300)
+        self.rect.center = (WIDTH / 2, HEIGHT + 350)
 
     def fill(self):
-        self.height += 1
-        pg.transform.scale(self.image, (WIDTH, self.height))
+        self.rect.center = self.pos
+        self.pos.y -= 1
 
+
+class Exit(pg.sprite.Sprite):
+
+    def __init__(self,x, y):
+        global vec
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.Surface((50, 70))
+        self.image.fill(PURPLE)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
 
