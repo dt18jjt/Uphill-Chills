@@ -1,5 +1,6 @@
 from settings import *
 from sprites import *
+from levels import *
 import pygame as pg, sys
 from pygame.locals import *
 import random
@@ -28,27 +29,11 @@ class Game:
         self.snowflakes = pg.sprite.Group()
         self.font_name = pg.font.match_font(FONT_NAME)
 
-
     def new(self):
         global vec
         self.player.pos = vec(0, HEIGHT - 100)
         self.pile.rect.center = vec(WIDTH / 2, HEIGHT + 350)
-        for plat in PLATFORM_LIST:
-            p = Platform(*plat)
-            self.all_sprites.add(p)
-            self.platforms.add(p)
-        for snow in SNOW_LIST:
-            s = Snow(*snow)
-            self.all_sprites.add(s)
-            self.snowPlatforms.add(s)
-        for ice in ICE_LIST:
-            i = Ice(*ice)
-            self.all_sprites.add(i)
-            self.icePlatforms.add(i)
-        for exit in EXIT_LIST:
-            e = Exit(*exit)
-            self.all_sprites.add(e)
-            self.exit.add(e)
+        self.createLevel()
         self.allPlatforms.add(self.platforms,self.snowPlatforms, self.icePlatforms,self.exit)
         self.all_sprites.add(self.player, self.freeze, self.pile)
         self.run()
@@ -61,7 +46,6 @@ class Game:
             self.events()
             self.update()
             self.draw()
-
 
     def update(self):
         global vec
@@ -111,11 +95,10 @@ class Game:
         # Complete
         complete = pg.sprite.spritecollide(self.player, self.exit, False)
         if complete:
+            for sprite in self.all_sprites:
+                sprite.kill()
             LEVEL += 1
             self.completeScreen()
-
-
-
 
     def events(self):
         for event in pg.event.get():
@@ -124,14 +107,47 @@ class Game:
                     self.playing = False
                 self.running = False
 
-
-
     def draw(self):
         self.screen.fill(CYAN)
         self.all_sprites.draw(self.screen)
         self.draw_text("DASH:"+str(self.player.dash), 22, WHITE, WIDTH / 2, 15)
 
-
+    def createLevel(self):
+        global LEVEL
+        if LEVEL == 1:
+            for plat in PLATFORM_LIST1:
+                p = Platform(*plat)
+                self.all_sprites.add(p)
+                self.platforms.add(p)
+            for snow in SNOW_LIST1:
+                s = Snow(*snow)
+                self.all_sprites.add(s)
+                self.snowPlatforms.add(s)
+            for ice in ICE_LIST1:
+                i = Ice(*ice)
+                self.all_sprites.add(i)
+                self.icePlatforms.add(i)
+            for exit in EXIT_LIST1:
+                e = Exit(*exit)
+                self.all_sprites.add(e)
+                self.exit.add(e)
+        elif LEVEL == 2:
+            for plat in PLATFORM_LIST2:
+                p = Platform(*plat)
+                self.all_sprites.add(p)
+                self.platforms.add(p)
+            for snow in SNOW_LIST2:
+                s = Snow(*snow)
+                self.all_sprites.add(s)
+                self.snowPlatforms.add(s)
+            for ice in ICE_LIST2:
+                i = Ice(*ice)
+                self.all_sprites.add(i)
+                self.icePlatforms.add(i)
+            for exit in EXIT_LIST2:
+                e = Exit(*exit)
+                self.all_sprites.add(e)
+                self.exit.add(e)
 
     def startScreen(self):
         # game splash/start screen
@@ -153,6 +169,8 @@ class Game:
         self.wait_for_key()
 
     def completeScreen(self):
+        #if not self.running:
+            #return
         global LEVEL
         print(LEVEL)
         self.screen.fill(PURPLE)
@@ -160,6 +178,7 @@ class Game:
         self.draw_text("Press a key to next level", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
         pg.display.flip()
         self.wait_for_key()
+        self.new()
 
 
 
