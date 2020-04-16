@@ -13,6 +13,8 @@ FONT_NAME = 'Impact'
 # size of window
 WIDTH = 360
 HEIGHT = 600
+# Spritesheet
+SPRITESHEET = "PengSheet.png"
 # Colours
 RED = (255, 0, 0)
 PINK = (255, 0, 150)
@@ -26,4 +28,5 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 # Level
 LEVEL = 1
+
 
