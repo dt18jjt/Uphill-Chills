@@ -28,5 +28,7 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 # Level
 LEVEL = 1
+# highscore file
+HS_FILE = "highscore"
 
 

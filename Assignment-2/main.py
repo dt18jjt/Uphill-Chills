@@ -5,7 +5,6 @@ from sprites import *
 from levels import *
 import pygame as pg, sys
 from pygame.locals import *
-import random
 from os import path
 import time
 vec = pg.math.Vector2
@@ -38,16 +37,23 @@ class Game:
         self.stars = pg.sprite.Group()
         self.starcount = 3
         self.startotal = 0
+        self.highscore = 0
         self.load_data()
 
     def load_data(self):
-        pass
+        # load high score
+        with open(path.join(self.dir, HS_FILE), 'r') as f:
+            try:
+                self.highscore = int(f.read())
+            except:
+                self.highscore = 0
         # load spritesheet image
 
     def new(self):
         global vec
         self.player.pos = vec(0, HEIGHT - 220)
         self.player.frozentime = 0
+        self.player.dash = 5
         self.pile.rect.center = vec(WIDTH / 2, HEIGHT + 300)
         self.createLevel()
         self.allPlatforms.add(self.platforms,self.snowPlatforms, self.icePlatforms, self.exit, self.stars)
@@ -92,33 +98,38 @@ class Game:
         # player on ice platform
         icehits = pg.sprite.spritecollide(self.player, self.icePlatforms, False)
         if icehits:
-            self.player.pos.y = icehits[0].rect.top
-            self.player.vel.y = 0
+            lowest = icehits[0]
+            for icehit in icehits:
+                if icehit.rect.bottom > lowest.rect.bottom:
+                    lowest = icehit
+            if self.player.pos.y < lowest.rect.bottom:
+                self.player.pos.y = lowest.rect.top
+                self.player.vel.y = 0
+                self.player.jumping = False
         frozen = pg.sprite.collide_rect(self.player, self.freeze)
         if frozen:
             self.freeze.reset()
             pg.time.wait(200)
             self.player.frozentime = time.time()
-            #pass
         starhits = pg.sprite.spritecollide(self.player, self.stars, False)
-        for star in self.stars:
-            if starhits and star.rect.y == self.player.pos.y - 30:
-                star.kill()
-                self.starcount -= 1
-                self.startotal += 1
+        if starhits:
+            star = starhits[0]
+            star.kill()
+            self.starcount -= 1
+            self.startotal += 1
         # if player reaches top 1/4 of screen
         if self.player.rect.top <= HEIGHT / 4:
             self.player.pos.y += abs(self.player.vel.y)
             for plat in self.allPlatforms:
                 plat.rect.y += abs(self.player.vel.y)
-                if plat.rect.top >= HEIGHT:
-                   plat.kill()
+                if plat.rect.y >= HEIGHT:
+                    plat.kill()
         # Die
         if self.player.rect.bottom > HEIGHT/1.2:
             death = pg.sprite.collide_rect(self.player, self.pile)
             for sprite in self.all_sprites:
                 sprite.rect.y -= max(self.player.vel.y, 10)
-                if death:
+                if death or self.player.pos.y > HEIGHT + 30:
                     self.playing = False
                     sprite.kill()
 
@@ -136,20 +147,14 @@ class Game:
                 if self.playing:
                     self.playing = False
                 self.running = False
-            #if event.type == pg.KEYDOWN:
-                #if event.key == pg.K_UP:
-                    #self.player.jump()
-                    # jumps when key is held
-            #if event.type == pg.KEYUP:
-                #if event.key == pg.K_UP:
-                    #self.player.jump_cut()
-                    # stops the jump arc when key is released
+
 
     def draw(self):
         self.screen.blit(background, (0, 0))
         self.all_sprites.draw(self.screen)
-        self.draw_text("DASH:"+str(self.player.dash), 22, BLUE, WIDTH / 2, 15)
-        self.draw_text("STARS:"+str(self.starcount), 22, YELLOW, WIDTH / 8, 15)
+        self.draw_text("DASHES LEFT:"+str(self.player.dash), 22, BLUE, WIDTH / 1.3, 15)
+        self.draw_text("STARS LEFT:"+str(self.starcount), 22, YELLOW, WIDTH / 5, 15)
+
 
     def createLevel(self):
         global LEVEL
@@ -193,7 +198,7 @@ class Game:
                 e = Exit(*exit)
                 self.all_sprites.add(e)
                 self.exit.add(e)
-            for star in STAR_LIST1:
+            for star in STAR_LIST2:
                 s = Star(*star)
                 self.all_sprites.add(s)
                 self.stars.add(s)
@@ -205,6 +210,7 @@ class Game:
         self.draw_text("L/R Arrows to move, UP to jump", 22, WHITE, WIDTH / 2, HEIGHT / 2)
         self.draw_text("Space to DASH",22, WHITE, WIDTH/2, HEIGHT * 5/8)
         self.draw_text("Press any key to play", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
+        self.draw_text("High Score: " + str(self.highscore), 22, WHITE, WIDTH / 2, HEIGHT * 5 / 6)
         pg.display.flip()
         self.wait_for_key()
 
@@ -214,6 +220,13 @@ class Game:
         self.screen.fill(BLUE)
         self.draw_text("GAME OVER", 48, WHITE, WIDTH / 2, HEIGHT / 4)
         self.draw_text("Press a key to play again", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
+        if self.startotal > self.highscore:
+            self.highscore = self.startotal
+            self.draw_text("NEW HIGH SCORE!", 22, WHITE, WIDTH / 2, HEIGHT * 5 / 6)
+            with open(path.join(self.dir, HS_FILE), 'w') as f:
+                f.write(str(self.startotal))
+        else:
+            self.draw_text("High Score: " + str(self.highscore), 22, WHITE, WIDTH / 2, HEIGHT * 5 / 6)
         pg.display.flip()
         self.startotal = 0
         self.wait_for_key()

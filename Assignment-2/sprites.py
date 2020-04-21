@@ -148,14 +148,12 @@ class Player(pg.sprite.Sprite):
             self.game.playing = False
         # when frozen
         if time.time() - self.frozentime > 2:
-            #self.image.fill(RED)
             self.frozen = False
             PLAYER_ACC = 0.5
             PLAYER_JSTR = -30
         else:
-            #self.image.fill(BLUE)
             self.frozen = True
-            PLAYER_ACC = 0.2
+            PLAYER_ACC = 0.1
             PLAYER_JSTR = -25
 
     def animate(self):
@@ -192,24 +190,6 @@ class Player(pg.sprite.Sprite):
                     self.direction = 0
                 self.rect = self.image.get_rect()
                 self.rect.bottom = bottom
-        # show jump animation
-        #if self.jumping and not self.walking and not self.frozen:
-            #if now - self.last_update > 350:
-                #self.last_update = now
-                #self.current_frame = (self.current_frame + 1) % len(self.jump_frames)
-                #bottom = self.rect.bottom
-                #self.image = self.jump_frames[self.current_frame]
-                #self.rect = self.image.get_rect()
-                #self.rect.bottom = bottom
-        # show frozen jump animation
-        #elif self.jumping and not self.walking and self.frozen:
-            #if now - self.last_update > 350:
-                #self.last_update = now
-                #self.current_frame = (self.current_frame + 1) % len(self.fjump_frames)
-                #bottom = self.rect.bottom
-                #self.image = self.fjump_frames[self.current_frame]
-                #self.rect = self.image.get_rect()
-                #self.rect.bottom = bottom
         # show idle animation
         if not self.jumping and not self.walking and not self.frozen:
             if now - self.last_update > 350:
@@ -306,10 +286,6 @@ class Pile(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.pos = vec(WIDTH / 2, HEIGHT + 300)
         self.rect.center = (WIDTH / 2, HEIGHT + 350)
-
-    def fill(self):
-        self.rect.center = self.pos
-        self.pos.y -= 1
 
 
 class Exit(pg.sprite.Sprite):
