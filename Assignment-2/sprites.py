@@ -3,6 +3,8 @@ import pygame as pg, sys
 import random
 import time
 vec = pg.math.Vector2
+platform_image = pg.image.load("Sprites/Platform.png")
+pile_image = pg.image.load("Pile.png")
 
 
 # Class for spritesheet
@@ -27,19 +29,19 @@ class Player(pg.sprite.Sprite):
         # Game class
         self.game = game
         # Normal animations
-        self.standing_frame_l = self.game.spritesheet.get_image(386, 0, 38, 41)
-        self.standing_frame_r = self.game.spritesheet.get_image(462, 0, 38, 41)
-        self.walk_frames_r = [self.game.spritesheet.get_image(424, 0, 38, 41),
-                              self.game.spritesheet.get_image(462, 0, 38, 41)]
-        self.walk_frames_l = [self.game.spritesheet.get_image(348, 0, 38, 41),
-                              self.game.spritesheet.get_image(386, 0, 38, 41)]
+        self.standing_frame_l = self.game.spritesheet.get_image(38, 112, 38, 41)
+        self.standing_frame_r = self.game.spritesheet.get_image(76, 112, 38, 41)
+        self.walk_frames_r = [self.game.spritesheet.get_image(0, 153, 38, 41),
+                              self.game.spritesheet.get_image(76, 112, 38, 41)]
+        self.walk_frames_l = [self.game.spritesheet.get_image(0, 112, 38, 41),
+                              self.game.spritesheet.get_image(38, 112, 38, 41)]
         # Frozen animations
-        self.fstanding_frame_l = self.game.spritesheet.get_image(136, 0, 38, 41)
-        self.fstanding_frame_r = self.game.spritesheet.get_image(212, 0, 38, 41)
-        self.fwalk_frames_r = [self.game.spritesheet.get_image(174, 0, 38, 41),
-                               self.game.spritesheet.get_image(212, 0, 38, 41)]
-        self.fwalk_frames_l = [self.game.spritesheet.get_image(98, 0, 38, 41),
-                               self.game.spritesheet.get_image(136, 0, 38, 41)]
+        self.fstanding_frame_l = self.game.spritesheet.get_image(0, 71, 38, 41)
+        self.fstanding_frame_r = self.game.spritesheet.get_image(76, 71, 38, 41)
+        self.fwalk_frames_r = [self.game.spritesheet.get_image(38, 71, 38, 41),
+                               self.game.spritesheet.get_image(76, 71, 38, 41)]
+        self.fwalk_frames_l = [self.game.spritesheet.get_image(60, 30, 38, 41),
+                               self.game.spritesheet.get_image(0, 71, 38, 41)]
         self.walking = False
         self.jumping = False
         self.direction = 0
@@ -76,8 +78,6 @@ class Player(pg.sprite.Sprite):
         for frame in self.fwalk_frames_l:
             frame.set_colorkey(BLACK)
 
-
-
     def jump(self):
         # jump only if standing on a platform
         self.rect.x += 1
@@ -106,7 +106,7 @@ class Player(pg.sprite.Sprite):
         now = pg.time.get_ticks()
         # if the player is on a ice platform the friction is reduced making it slide
         if slide:
-            PLAYER_FRICTION = 0
+            PLAYER_FRICTION = 0.2
         else:
             PLAYER_FRICTION = -0.12
         # moves to the left
@@ -149,12 +149,12 @@ class Player(pg.sprite.Sprite):
         # when frozen
         if time.time() - self.frozentime > 2:
             self.frozen = False
-            PLAYER_ACC = 0.5
+            PLAYER_ACC = 0.6
             PLAYER_JSTR = -30
         else:
             self.frozen = True
             PLAYER_ACC = 0.1
-            PLAYER_JSTR = -25
+            PLAYER_JSTR = -20
 
     def animate(self):
         now = pg.time.get_ticks()
@@ -218,10 +218,13 @@ class Player(pg.sprite.Sprite):
 
 # Class for normal platforms
 class Platform(pg.sprite.Sprite):
-    def __init__(self, x, y, w, h):
+    def __init__(self, game, x, y, w, h):
+        global platform_image
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((w, h))
-        self.image.fill(GREEN)
+        self.game = game
+        self.fill = self.game.spritesheet.get_image(60, 0, 60, 30)
+        self.image = pg.transform.scale(self.fill, (w, h))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -229,10 +232,12 @@ class Platform(pg.sprite.Sprite):
 
 # Class for snow platforms
 class Snow(pg.sprite.Sprite):
-    def __init__(self, x, y, w, h):
+    def __init__(self, game, x, y, w, h):
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((w, h))
-        self.image.fill(YELLOW)
+        self.game = game
+        self.fill = self.game.spritesheet.get_image(0, 30, 60, 30)
+        self.image = pg.transform.scale(self.fill, (w, h))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -243,10 +248,12 @@ class Snow(pg.sprite.Sprite):
 
 
 class Ice(pg.sprite.Sprite):
-    def __init__(self, x, y, w, h):
+    def __init__(self, game, x, y, w, h):
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((w, h))
-        self.image.fill(BLUE)
+        self.game = game
+        self.fill = self.game.spritesheet.get_image(0, 0, 60, 30)
+        self.image = pg.transform.scale(self.fill, (w, h))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -254,17 +261,38 @@ class Ice(pg.sprite.Sprite):
 
 class Freeze(pg.sprite.Sprite):
 
-    def __init__(self,):
+    def __init__(self, game):
         global vec
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((20, 20))
-        self.image.fill(WHITE)
+        self.game = game
+        self.fill = [self.game.spritesheet.get_image(49, 251, 50, 50),
+                     self.game.spritesheet.get_image(0, 301, 50, 50)]
+        self.current_frame = 0
+        self.last_update = 0
+        self.load_images()
+        self.image = self.game.spritesheet.get_image(49, 251, 50, 50)
+        self.image = pg.transform.scale(self.image, (30, 30))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = (random.randrange(10, WIDTH - 10), 0)
         self.pos = vec(random.randrange(10, WIDTH - 10), 10)
         self.speed = 5
 
+    def load_images(self):
+        # on each frame
+        for frame in self.fill:
+            frame.set_colorkey(BLACK)
+
+    def animate(self):
+        now = pg.time.get_ticks()
+        if now - self.last_update > 100:
+            self.last_update = now
+            self.current_frame = (self.current_frame + 1) % len(self.fill)
+            self.image = self.fill[self.current_frame]
+            self.image = pg.transform.scale(self.image, (30, 30))
+
     def fall(self):
+        self.animate()
         self.rect.center = self.pos
         self.pos.y += self.speed
         if self.pos.y > HEIGHT:
@@ -281,8 +309,8 @@ class Pile(pg.sprite.Sprite):
         global vec
         pg.sprite.Sprite.__init__(self)
         self.height = 150
-        self.image = pg.Surface((WIDTH, HEIGHT))
-        self.image.fill(GREY)
+        self.image = pile_image
+        #self.image.fill(GREY)
         self.rect = self.image.get_rect()
         self.pos = vec(WIDTH / 2, HEIGHT + 300)
         self.rect.center = (WIDTH / 2, HEIGHT + 350)
@@ -290,11 +318,12 @@ class Pile(pg.sprite.Sprite):
 
 class Exit(pg.sprite.Sprite):
 
-    def __init__(self,x, y):
+    def __init__(self, game, x, y):
         global vec
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((50, 70))
-        self.image.fill(PURPLE)
+        self.game = game
+        self.image = self.game.spritesheet.get_image(50, 351, 70, 70)
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -302,13 +331,36 @@ class Exit(pg.sprite.Sprite):
 
 class Star(pg.sprite.Sprite):
 
-    def __init__(self,x, y):
+    def __init__(self, game, x, y):
         global vec
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((20, 20))
-        self.image.fill(YELLOW)
+        self.game = game
+        self.fill = [self.game.spritesheet.get_image(50, 301, 50, 50),
+                      self.game.spritesheet.get_image(0, 351, 50, 50)]
+        self.current_frame = 0
+        self.last_update = 0
+        self.load_images()
+        self.image = self.game.spritesheet.get_image(50, 301, 50, 50)
+        self.image = pg.transform.scale(self.image, (30, 30))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+    def load_images(self):
+        # on each frame
+        for frame in self.fill:
+            frame.set_colorkey(BLACK)
+
+    def animate(self):
+        now = pg.time.get_ticks()
+        if now - self.last_update > 100:
+            self.last_update = now
+            self.current_frame = (self.current_frame + 1) % len(self.fill)
+            self.image = self.fill[self.current_frame]
+            self.image = pg.transform.scale(self.image, (30, 30))
+
+    def update(self):
+        self.animate()
 
 

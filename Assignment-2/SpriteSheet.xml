@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker https://www.codeandweb.com/texturepacker -->
+<!-- $TexturePacker:SmartUpdate:ae9b5b8d3eacadfce281b2e959e9d027:c81877272f63a7484374e34f7d4e0b23:3d386838d3253c75889c67515ab77d98$ -->
+<!--Format:
+n  => name of the sprite
+x  => sprite x pos in texture
+y  => sprite y pos in texture
+w  => sprite width (may be trimmed)
+h  => sprite height (may be trimmed)
+pX => x pos of the pivot point (relative to sprite width)
+pY => y pos of the pivot point (relative to sprite height)
+oX => sprite's x-corner offset (only available if trimmed)
+oY => sprite's y-corner offset (only available if trimmed)
+oW => sprite's original width (only available if trimmed)
+oH => sprite's original height (only available if trimmed)
+r => 'y' only set if sprite is rotated
+with polygon mode enabled:
+vertices   => points in sprite coordinate system (x0,y0,x1,y1,x2,y2, ...)
+verticesUV => points in sheet coordinate system (x0,y0,x1,y1,x2,y2, ...)
+triangles  => sprite triangulation, 3 vertex indices per triangle
+-->
+<TextureAtlas imagePath="SpriteSheet.png" width="120" height="421">
+    <sprite n="Exit.png" x="50" y="351" w="70" h="70"/>
+    <sprite n="FJump1.png" x="38" y="153" w="49" h="49"/>
+    <sprite n="FJump2.png" x="0" y="202" w="49" h="49"/>
+    <sprite n="Flake 1.png" x="49" y="251" w="50" h="50"/>
+    <sprite n="Flake 2.png" x="0" y="301" w="50" h="50"/>
+    <sprite n="FLeft1.png" x="60" y="30" w="38" h="41"/>
+    <sprite n="FLeft2.png" x="0" y="71" w="38" h="41"/>
+    <sprite n="FRight1.png" x="38" y="71" w="38" h="41"/>
+    <sprite n="FRight2.png" x="76" y="71" w="38" h="41"/>
+    <sprite n="IcePlatform.png" x="0" y="0" w="60" h="30"/>
+    <sprite n="PJump1.png" x="49" y="202" w="49" h="49"/>
+    <sprite n="PJump2.png" x="0" y="251" w="49" h="49"/>
+    <sprite n="Platform.png" x="60" y="0" w="60" h="30"/>
+    <sprite n="PLef1.png" x="0" y="112" w="38" h="41"/>
+    <sprite n="PLef2.png" x="38" y="112" w="38" h="41"/>
+    <sprite n="PRight1.png" x="76" y="112" w="38" h="41"/>
+    <sprite n="PRight2.png" x="0" y="153" w="38" h="41"/>
+    <sprite n="SnowPlatform.png" x="0" y="30" w="60" h="30"/>
+    <sprite n="Star 1.png" x="50" y="301" w="50" h="50"/>
+    <sprite n="Star 2.png" x="0" y="351" w="50" h="50"/>
+</TextureAtlas>

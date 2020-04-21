@@ -25,7 +25,7 @@ class Game:
         self.dir = path.dirname(__file__)
         self.spritesheet = Spritesheet(path.join(self.dir, SPRITESHEET))
         self.player = Player(self)
-        self.freeze = Freeze()
+        self.freeze = Freeze(self)
         self.pile = Pile()
         self.exit = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
@@ -155,51 +155,50 @@ class Game:
         self.draw_text("DASHES LEFT:"+str(self.player.dash), 22, BLUE, WIDTH / 1.3, 15)
         self.draw_text("STARS LEFT:"+str(self.starcount), 22, YELLOW, WIDTH / 5, 15)
 
-
     def createLevel(self):
         global LEVEL
         if LEVEL == 1:
             self.starcount = 3
             for plat in PLATFORM_LIST1:
-                p = Platform(*plat)
+                p = Platform(self, *plat)
                 self.all_sprites.add(p)
                 self.platforms.add(p)
             for snow in SNOW_LIST1:
-                s = Snow(*snow)
+                s = Snow(self, *snow)
                 self.all_sprites.add(s)
                 self.snowPlatforms.add(s)
             for ice in ICE_LIST1:
-                i = Ice(*ice)
+                i = Ice(self, *ice)
                 self.all_sprites.add(i)
                 self.icePlatforms.add(i)
             for exit in EXIT_LIST1:
-                e = Exit(*exit)
+                e = Exit(self, *exit)
                 self.all_sprites.add(e)
                 self.exit.add(e)
             for star in STAR_LIST1:
-                s = Star(*star)
+                s = Star(self, *star)
                 self.all_sprites.add(s)
                 self.stars.add(s)
         elif LEVEL == 2:
             self.starcount = 4
             for plat in PLATFORM_LIST2:
-                p = Platform(*plat)
+                p = Platform(self, *plat)
                 self.all_sprites.add(p)
                 self.platforms.add(p)
             for snow in SNOW_LIST2:
-                s = Snow(*snow)
+                s = Snow(self, *snow)
                 self.all_sprites.add(s)
                 self.snowPlatforms.add(s)
             for ice in ICE_LIST2:
-                i = Ice(*ice)
+                i = Ice(self, *ice)
                 self.all_sprites.add(i)
                 self.icePlatforms.add(i)
             for exit in EXIT_LIST2:
-                e = Exit(*exit)
+                e = Exit(self, *exit)
                 self.all_sprites.add(e)
                 self.exit.add(e)
             for star in STAR_LIST2:
-                s = Star(*star)
+                s = Star(self, *star)
                 self.all_sprites.add(s)
                 self.stars.add(s)
 
@@ -215,8 +214,10 @@ class Game:
         self.wait_for_key()
 
     def overScreen(self):
+        global LEVEL
         if not self.running:
             return
+        LEVEL = 1
         self.screen.fill(BLUE)
         self.draw_text("GAME OVER", 48, WHITE, WIDTH / 2, HEIGHT / 4)
         self.draw_text("Press a key to play again", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)

@@ -14,7 +14,7 @@ FONT_NAME = 'Impact'
 WIDTH = 360
 HEIGHT = 600
 # Spritesheet
-SPRITESHEET = "PengSheet.png"
+SPRITESHEET = "SpriteSheet.png"
 # Colours
 RED = (255, 0, 0)
 PINK = (255, 0, 150)
