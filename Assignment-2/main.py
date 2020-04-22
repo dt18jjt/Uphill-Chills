@@ -287,7 +287,9 @@ class Game:
             self.draw_text("High Score: " + str(self.highscore), 22, WHITE, WIDTH / 2, HEIGHT * 5 / 6)
         pg.display.flip()
         self.startotal = 0
+        pg.time.wait(500)
         self.wait_for_key()
+        self.over_music.stop()
 
     def completeScreen(self):
         #if not self.running:
@@ -298,10 +300,10 @@ class Game:
         self.screen.fill(PURPLE)
         self.draw_text("LEVEL COMPlETE", 48, WHITE, WIDTH / 2, HEIGHT / 4)
         self.draw_text("STARS COLLECTED:" + str(self.starcount), 22, YELLOW, WIDTH / 2, HEIGHT / 2)
-        self.draw_text("Press a key to next level", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
+        self.draw_text("Press any key to next level", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
         pg.display.flip()
         self.wait_for_key()
-        pg.time.wait(500)
+        self.complete_music.stop()
         self.new()
 
 
@@ -314,7 +316,7 @@ class Game:
                 if event.type == pg.QUIT:
                     waiting = False
                     self.running = False
-                if event.type == pg.KEYUP:
+                if event.type == pg.KEYDOWN:
                     waiting = False
 
     def draw_text(self, text, size, color, x, y):
