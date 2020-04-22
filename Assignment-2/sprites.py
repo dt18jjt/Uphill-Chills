@@ -106,7 +106,7 @@ class Player(pg.sprite.Sprite):
         now = pg.time.get_ticks()
         # if the player is on a ice platform the friction is reduced making it slide
         if slide:
-            PLAYER_FRICTION = 0.2
+            PLAYER_FRICTION = 0.3
         else:
             PLAYER_FRICTION = -0.12
         # moves to the left
