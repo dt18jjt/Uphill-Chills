@@ -56,11 +56,12 @@ class Player(pg.sprite.Sprite):
         self.pos = vec(0, HEIGHT - 100)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
-        self.dash = 5
+        self.dash = 3
         self.frozen = False
         self.frozentime = 0
         self.dashlast = pg.time.get_ticks()
         self.dashcooldown = 1000
+
 
     def load_images(self):
         # normal
@@ -104,11 +105,12 @@ class Player(pg.sprite.Sprite):
         keys = pg.key.get_pressed()
         slide = pg.sprite.spritecollide(self, self.game.icePlatforms, False)
         now = pg.time.get_ticks()
-        # if the player is on a ice platform the friction is reduced making it slide
+        # if the player is on a ice platform the acceleration is increased making it slide
         if slide:
-            PLAYER_FRICTION = 0.3
-        else:
-            PLAYER_FRICTION = -0.12
+            if self.direction == 0:
+                self.acc.x = -1
+            elif self.direction == 1:
+                self.acc.x = 1
         # moves to the left
         if keys[pg.K_LEFT]:
             PLAYER_ACC = 0.5
@@ -149,8 +151,8 @@ class Player(pg.sprite.Sprite):
         # when frozen
         if time.time() - self.frozentime > 2:
             self.frozen = False
-            PLAYER_ACC = 0.6
-            PLAYER_JSTR = -30
+            PLAYER_ACC = 0.5
+            PLAYER_JSTR = -25
         else:
             self.frozen = True
             PLAYER_ACC = 0.1

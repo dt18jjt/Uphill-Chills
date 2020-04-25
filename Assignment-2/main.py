@@ -20,6 +20,7 @@ from os import path
 import time
 vec = pg.math.Vector2
 
+
 # Class for the main game
 class Game:
 
@@ -38,7 +39,6 @@ class Game:
         self.complete_music = pg.mixer.Sound('Audio/Win sound.ogg')
         self.over_music = pg.mixer.Sound('Audio/Time.ogg')
         self.freeze_sound = pg.mixer.Sound('Audio/LedasLuzta.ogg')
-        self.slide_sound = pg.mixer.Sound('Audio/cartoon-throw.wav')
         self.snow_sound = pg.mixer.Sound('Audio/SnowWalk.ogg')
         self.exit_sound = pg.mixer.Sound('Audio/porta.ogg')
         self.star_sound = pg.mixer.Sound('Audio/Picked Coin Echo.ogg')
@@ -67,6 +67,7 @@ class Game:
         self.starcount = 0
         self.startotal = 0
         self.highscore = 0
+        self.fade = pg.Surface((WIDTH, HEIGHT))
         self.load_data()
 
     def load_data(self):
@@ -83,12 +84,14 @@ class Game:
         self.level_music.play(-1)
         self.player.pos = vec(0, HEIGHT - 220)
         self.player.frozentime = 0
-        self.player.dash = 5
+        self.starcount = 0
+        self.player.dash = 3
         self.pile.rect.center = vec(WIDTH / 2, HEIGHT + 300)
         self.createLevel()
         self.allPlatforms.add(self.platforms,self.snowPlatforms, self.icePlatforms, self.exit, self.stars)
         self.all_sprites.add(self.player, self.freeze, self.pile)
         self.run()
+
 
     def run(self):
         self.playing = True
@@ -122,14 +125,13 @@ class Game:
         now = pg.time.get_ticks()
         # player on snow platform
         snowhits = pg.sprite.spritecollide(self.player, self.snowPlatforms, False)
-        for snow in self.snowPlatforms:
-            if snowhits and snow.rect.y == self.player.pos.y:
-                self.snow_sound.play()
-                snow.kill()
+        if snowhits:
+            self.snow_sound.play()
+            snow = snowhits[0]
+            snow.kill()
         # player on ice platform
         icehits = pg.sprite.spritecollide(self.player, self.icePlatforms, False)
         if icehits:
-            #self.slide_sound.play()
             lowest = icehits[0]
             for icehit in icehits:
                 if icehit.rect.bottom > lowest.rect.bottom:
@@ -138,12 +140,14 @@ class Game:
                 self.player.pos.y = lowest.rect.top
                 self.player.vel.y = 0
                 self.player.jumping = False
+        # player frozen by a snowflake
         frozen = pg.sprite.collide_rect(self.player, self.freeze)
         if frozen:
             self.freeze.reset()
             self.freeze_sound.play()
             pg.time.wait(200)
             self.player.frozentime = time.time()
+        # player collecting star
         starhits = pg.sprite.spritecollide(self.player, self.stars, False)
         if starhits:
             self.star_sound.play()
@@ -167,7 +171,6 @@ class Game:
                     self.level_music.stop()
                     self.playing = False
                     sprite.kill()
-
         # Complete
         complete = pg.sprite.spritecollide(self.player, self.exit, False)
         if complete:
@@ -177,7 +180,12 @@ class Game:
                 sprite.kill()
             LEVEL += 1
             self.startotal += self.starcount
-            self.completeScreen()
+            if LEVEL < 5:
+                self.fadein(PURPLE)
+                self.completeScreen()
+            else:
+                self.fadein(GREEN)
+                self.endScreen()
 
 
     def events(self):
@@ -198,7 +206,7 @@ class Game:
     def createLevel(self):
         global LEVEL
         if LEVEL == 1:
-            self.starcount = 3
+            self.starleft = len(STAR_LIST1)
             for plat in PLATFORM_LIST1:
                 p = Platform(self, *plat)
                 self.all_sprites.add(p)
@@ -220,7 +228,7 @@ class Game:
                 self.all_sprites.add(s)
                 self.stars.add(s)
         elif LEVEL == 2:
-            self.starcount = 4
+            self.starleft = len(STAR_LIST2)
             for plat in PLATFORM_LIST2:
                 p = Platform(self, *plat)
                 self.all_sprites.add(p)
@@ -241,17 +249,60 @@ class Game:
                 s = Star(self, *star)
                 self.all_sprites.add(s)
                 self.stars.add(s)
+        elif LEVEL == 3:
+            self.starleft = len(STAR_LIST3)
+            for plat in PLATFORM_LIST3:
+                p = Platform(self, *plat)
+                self.all_sprites.add(p)
+                self.platforms.add(p)
+            for snow in SNOW_LIST3:
+                s = Snow(self, *snow)
+                self.all_sprites.add(s)
+                self.snowPlatforms.add(s)
+            for ice in ICE_LIST3:
+                i = Ice(self, *ice)
+                self.all_sprites.add(i)
+                self.icePlatforms.add(i)
+            for exit in EXIT_LIST3:
+                e = Exit(self, *exit)
+                self.all_sprites.add(e)
+                self.exit.add(e)
+            for star in STAR_LIST3:
+                s = Star(self, *star)
+                self.all_sprites.add(s)
+                self.stars.add(s)
+        elif LEVEL == 4:
+            self.starleft = len(STAR_LIST4)
+            for plat in PLATFORM_LIST4:
+                p = Platform(self, *plat)
+                self.all_sprites.add(p)
+                self.platforms.add(p)
+            for snow in SNOW_LIST4:
+                s = Snow(self, *snow)
+                self.all_sprites.add(s)
+                self.snowPlatforms.add(s)
+            for ice in ICE_LIST4:
+                i = Ice(self, *ice)
+                self.all_sprites.add(i)
+                self.icePlatforms.add(i)
+            for exit in EXIT_LIST4:
+                e = Exit(self, *exit)
+                self.all_sprites.add(e)
+                self.exit.add(e)
+            for star in STAR_LIST4:
+                s = Star(self, *star)
+                self.all_sprites.add(s)
+                self.stars.add(s)
 
     def fadein(self, colour):
-        fade = pg.Surface((WIDTH, HEIGHT))
-        fade.fill(colour)
+        self.fade.fill(colour)
         for alpha in range(0, 300):
-            fade.set_alpha(alpha)
-            self.screen.blit(fade, (0, 0))
+            self.fade.set_alpha(alpha)
+            self.screen.blit(self.fade, (0, 0))
             pg.display.update()
             pg.time.delay(0)
-
-
+            if alpha >= 300:
+                break
 
     def startScreen(self):
         # game splash/start screen
@@ -259,13 +310,16 @@ class Game:
         self.title_music.play(-1)
         self.screen.blit(self.titleImage, (0, HEIGHT / 8))
         self.draw_text("L/R Arrows to move, UP to jump", 22, WHITE, WIDTH / 2, HEIGHT / 2)
-        self.draw_text("Space to DASH",22, WHITE, WIDTH/2, HEIGHT * 5/8)
-        self.draw_text("Press any key to play", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
-        self.draw_text("High Score: " + str(self.highscore), 22, WHITE, WIDTH / 2, HEIGHT * 5 / 6)
+        self.draw_text("Space to DASH",22, WHITE, WIDTH/2, HEIGHT * 6 / 10)
+        self.draw_text("Avoid the Snowflakes", 22, WHITE, WIDTH / 2, HEIGHT * 7 / 10)
+        self.draw_text("Press any key to play", 22, WHITE, WIDTH / 2, HEIGHT * 8 / 10)
+        self.draw_text("High Score: " + str(self.highscore), 22, WHITE, WIDTH / 2, HEIGHT * 9 / 10)
         pg.display.flip()
         self.wait_for_key()
         self.fadein(WHITE)
         self.title_music.stop()
+        #self.fadeout()
+
 
     def overScreen(self):
         global LEVEL
@@ -277,10 +331,11 @@ class Game:
         self.over_music.play()
         self.screen.fill(BLUE)
         self.draw_text("GAME OVER", 48, WHITE, WIDTH / 2, HEIGHT / 4)
+        self.draw_text("The penguin was taken away by the snow", 22, WHITE, WIDTH / 2, HEIGHT * 5 / 10)
         self.draw_text("Press a key to play again", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
         if self.startotal > self.highscore:
             self.highscore = self.startotal
-            self.draw_text("NEW HIGH SCORE!", 22, WHITE, WIDTH / 2, HEIGHT * 5 / 6)
+            self.draw_text("NEW HIGH SCORE!", 22, RED, WIDTH / 2, HEIGHT * 5 / 6)
             with open(path.join(self.dir, HS_FILE), 'w') as f:
                 f.write(str(self.startotal))
         else:
@@ -292,19 +347,44 @@ class Game:
         self.over_music.stop()
 
     def completeScreen(self):
-        #if not self.running:
-            #return
         global LEVEL
         print(LEVEL)
         self.complete_music.play()
         self.screen.fill(PURPLE)
         self.draw_text("LEVEL COMPlETE", 48, WHITE, WIDTH / 2, HEIGHT / 4)
-        self.draw_text("STARS COLLECTED:" + str(self.starcount), 22, YELLOW, WIDTH / 2, HEIGHT / 2)
+        self.draw_text("TOTAL STARS COLLECTED:" + str(self.startotal), 22, YELLOW, WIDTH / 2, HEIGHT / 2)
+        self.draw_text("The penguin is closer to home", 22, WHITE, WIDTH / 2, HEIGHT * 6 / 10)
         self.draw_text("Press any key to next level", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
         pg.display.flip()
+        pg.time.wait(1000)
         self.wait_for_key()
+        self.fadein(WHITE)
         self.complete_music.stop()
         self.new()
+
+    def endScreen(self):
+        global LEVEL
+        LEVEL = 1
+        self.complete_music.play()
+        self.screen.fill(GREEN)
+        self.draw_text("Congratulations!!!", 48, WHITE, WIDTH / 2, HEIGHT / 4)
+        self.draw_text("The penguin safely returned home", 22, WHITE, WIDTH / 2, HEIGHT * 4 / 10)
+        self.draw_text("TOTAL STARS COLLECTED:" + str(self.startotal), 22, YELLOW, WIDTH / 2, HEIGHT / 2)
+        if self.startotal > self.highscore:
+            self.highscore = self.startotal
+            self.draw_text("NEW HIGH SCORE!", 22, RED, WIDTH / 2, HEIGHT * 5 / 10)
+            with open(path.join(self.dir, HS_FILE), 'w') as f:
+                f.write(str(self.startotal))
+        else:
+            self.draw_text("High Score: " + str(self.highscore), 22, WHITE, WIDTH / 2, HEIGHT * 6 / 10)
+        self.draw_text("Press any key to return to the title", 22, WHITE, WIDTH / 2, HEIGHT * 7 / 10)
+        pg.display.flip()
+        pg.time.wait(1000)
+        self.wait_for_key()
+        self.fadein(WHITE)
+        self.complete_music.stop()
+        self.startScreen()
+
 
 
 
@@ -314,8 +394,8 @@ class Game:
             self.clock.tick(60)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    waiting = False
                     self.running = False
+                    waiting = False
                 if event.type == pg.KEYDOWN:
                     waiting = False
 

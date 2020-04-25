@@ -1,7 +1,7 @@
 import pygame as pg, sys
 import random
 PLAY = True
-
+# player values
 PLAYER_ACC = 0.5
 PLAYER_FRICTION = -0.12
 PLAYER_GRAV = 1
@@ -9,6 +9,7 @@ PLAYER_JSTR = 25
 DASH_COUNT = 5
 DASH_TIMER = 0
 DASH_STR = 20
+# font
 FONT_NAME = 'Impact'
 # size of window
 WIDTH = 360
@@ -19,7 +20,7 @@ SPRITESHEET = "SpriteSheet.png"
 RED = (255, 0, 0)
 PINK = (255, 0, 150)
 PURPLE = (255, 0, 255)
-YELLOW = (255, 255, 0)
+YELLOW = (255, 200, 0)
 BLUE = (0, 0, 255)
 CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
