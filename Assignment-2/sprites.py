@@ -42,26 +42,31 @@ class Player(pg.sprite.Sprite):
                                self.game.spritesheet.get_image(76, 71, 38, 41)]
         self.fwalk_frames_l = [self.game.spritesheet.get_image(60, 30, 38, 41),
                                self.game.spritesheet.get_image(0, 71, 38, 41)]
+        # values for the animation, direction and if the player is jumping or walking
         self.walking = False
         self.jumping = False
         self.direction = 0
         self.current_frame = 0
         self.last_update = 0
+        # loads images from spritesheet
         self.load_images()
         self.image = self.standing_frame_l
+        # makes the colour black invisible on the image
         self.image.set_colorkey(BLACK)
-        #self.image.fill(RED)
         self.rect = self.image.get_rect()
+        # rectangle border and postion of player
         self.rect.center = (0, HEIGHT - 100)
         self.pos = vec(0, HEIGHT - 100)
+        # speed values of the player
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
+        # the amount of dashes the player has and the cooldown
         self.dash = 3
-        self.frozen = False
-        self.frozentime = 0
         self.dashlast = pg.time.get_ticks()
         self.dashcooldown = 1000
-
+        # if the player is frozen and how long they're frozen for
+        self.frozen = False
+        self.frozentime = 0
 
     def load_images(self):
         # normal
@@ -89,6 +94,7 @@ class Player(pg.sprite.Sprite):
             self.jumping = True
 
     def jump_cut(self):
+        # when the jump reaches it's apex
         if self.jumping:
             if self.vel.y < -3:
                 self.vel.y = -3
@@ -100,9 +106,12 @@ class Player(pg.sprite.Sprite):
         global DASH_STR
         global PLAYER_ACC
         global PLAYER_JSTR
+        # player animation
         self.animate()
+        # the constant accelration when there are no inputs
         self.acc = vec(0, PLAYER_GRAV)
         keys = pg.key.get_pressed()
+        # when the player is colliding with a ice platform
         slide = pg.sprite.spritecollide(self, self.game.icePlatforms, False)
         now = pg.time.get_ticks()
         # if the player is on a ice platform the acceleration is increased making it slide
@@ -115,6 +124,7 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_LEFT]:
             PLAYER_ACC = 0.5
             self.acc.x = -PLAYER_ACC
+            # dashes to the left
             if keys[pg.K_SPACE] and self.dash > 0 and now - self.dashlast >= self.dashcooldown:
                 self.dash -= 1
                 PLAYER_ACC = DASH_STR
@@ -124,11 +134,13 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_RIGHT]:
             PLAYER_ACC = 0.5
             self.acc.x = PLAYER_ACC
+            # dashes to the right
             if keys[pg.K_SPACE] and self.dash > 0 and now - self.dashlast >= self.dashcooldown:
                 self.dash -= 1
                 PLAYER_ACC = DASH_STR
                 self.acc.x = PLAYER_ACC
                 self.dashlast = now
+        # jump
         if keys[pg.K_UP]:
             self.jump()
             if not keys[pg.K_UP]:
@@ -160,6 +172,7 @@ class Player(pg.sprite.Sprite):
 
     def animate(self):
         now = pg.time.get_ticks()
+        # is walking if velocity does not equal 0 else is not walking
         if self.vel.x != 0:
             self.walking = True
         else:
@@ -168,11 +181,14 @@ class Player(pg.sprite.Sprite):
         if self.walking and not self.frozen and not self.jumping:
             if now - self.last_update > 180:
                 self.last_update = now
+                # change frames
                 self.current_frame = (self.current_frame + 1) % len(self.walk_frames_l)
                 bottom = self.rect.bottom
+                # moving to the right
                 if self.vel.x > 0:
                     self.image = self.walk_frames_r[self.current_frame]
                     self.direction = 1
+                # moving to the left
                 else:
                     self.image = self.walk_frames_l[self.current_frame]
                     self.direction = 0
@@ -196,10 +212,11 @@ class Player(pg.sprite.Sprite):
         if not self.jumping and not self.walking and not self.frozen:
             if now - self.last_update > 350:
                 self.last_update = now
-                #self.current_frame = (self.current_frame + 1) % len(self.standing_frame)
                 bottom = self.rect.bottom
+                # facing to the left
                 if self.direction == 0:
                     self.image = self.standing_frame_l
+                # facing to the right
                 elif self.direction == 1:
                     self.image = self.standing_frame_r
                 self.rect = self.image.get_rect()
@@ -208,7 +225,6 @@ class Player(pg.sprite.Sprite):
         if not self.jumping and not self.walking and self.frozen:
             if now - self.last_update > 350:
                 self.last_update = now
-                #self.current_frame = (self.current_frame + 1) % len(self.fstanding_frame)
                 bottom = self.rect.bottom
                 if self.direction == 0:
                     self.image = self.fstanding_frame_l
@@ -224,7 +240,9 @@ class Platform(pg.sprite.Sprite):
         global platform_image
         pg.sprite.Sprite.__init__(self)
         self.game = game
+        # get image from spritesheet
         self.fill = self.game.spritesheet.get_image(60, 0, 60, 30)
+        # scales images based on width and height
         self.image = pg.transform.scale(self.fill, (w, h))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
@@ -237,47 +255,51 @@ class Snow(pg.sprite.Sprite):
     def __init__(self, game, x, y, w, h):
         pg.sprite.Sprite.__init__(self)
         self.game = game
+        # get image from spritesheet
         self.fill = self.game.spritesheet.get_image(0, 30, 60, 30)
+        # scales images based on width and height
         self.image = pg.transform.scale(self.fill, (w, h))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.fall = False
 
-    def destroy(self):
-        self.fall = True
-
-
+# Class for ice platforms
 class Ice(pg.sprite.Sprite):
     def __init__(self, game, x, y, w, h):
         pg.sprite.Sprite.__init__(self)
         self.game = game
+        # get image from spritesheet
         self.fill = self.game.spritesheet.get_image(0, 0, 60, 30)
+        # scales images based on width and height
         self.image = pg.transform.scale(self.fill, (w, h))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
-
+# class for snowflakes
 class Freeze(pg.sprite.Sprite):
 
     def __init__(self, game):
         global vec
         pg.sprite.Sprite.__init__(self)
         self.game = game
+        # images for snowflake on sprite sheet
         self.fill = [self.game.spritesheet.get_image(49, 251, 50, 50),
                      self.game.spritesheet.get_image(0, 301, 50, 50)]
         self.current_frame = 0
         self.last_update = 0
         self.load_images()
+        # get image from spritesheet
         self.image = self.game.spritesheet.get_image(49, 251, 50, 50)
+        # scales images based on width and height
         self.image = pg.transform.scale(self.image, (30, 30))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = (random.randrange(10, WIDTH - 10), 0)
         self.pos = vec(random.randrange(10, WIDTH - 10), 10)
+        # speed of falling
         self.speed = 5
 
     def load_images(self):
@@ -294,6 +316,7 @@ class Freeze(pg.sprite.Sprite):
             self.image = pg.transform.scale(self.image, (30, 30))
 
     def fall(self):
+        # snowflaske animation
         self.animate()
         self.rect.center = self.pos
         self.pos.y += self.speed
@@ -301,42 +324,45 @@ class Freeze(pg.sprite.Sprite):
             self.reset()
 
     def reset(self):
+        # when it goes off screen
         global vec
         self.pos = vec(random.randrange(10, WIDTH - 10), 10)
 
-
+# class for snow pile
 class Pile(pg.sprite.Sprite):
 
     def __init__(self):
         global vec
         pg.sprite.Sprite.__init__(self)
         self.height = 150
+        # image
         self.image = pile_image
-        #self.image.fill(GREY)
         self.rect = self.image.get_rect()
         self.pos = vec(WIDTH / 2, HEIGHT + 300)
         self.rect.center = (WIDTH / 2, HEIGHT + 350)
 
-
+# class for portal exit
 class Exit(pg.sprite.Sprite):
 
     def __init__(self, game, x, y):
         global vec
         pg.sprite.Sprite.__init__(self)
         self.game = game
+        # image
         self.image = self.game.spritesheet.get_image(50, 351, 70, 70)
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
-
+# class for stars
 class Star(pg.sprite.Sprite):
 
     def __init__(self, game, x, y):
         global vec
         pg.sprite.Sprite.__init__(self)
         self.game = game
+        # images for star on sprite sheet
         self.fill = [self.game.spritesheet.get_image(50, 301, 50, 50),
                       self.game.spritesheet.get_image(0, 351, 50, 50)]
         self.current_frame = 0
@@ -363,6 +389,7 @@ class Star(pg.sprite.Sprite):
             self.image = pg.transform.scale(self.image, (30, 30))
 
     def update(self):
+        # star animation
         self.animate()
 
 
