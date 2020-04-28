@@ -161,7 +161,7 @@ class Player(pg.sprite.Sprite):
         if self.pos.y <= 0:
             self.game.playing = False
         # when frozen
-        if time.time() - self.frozentime > 2:
+        if time.time() - self.frozentime > 1.5:
             self.frozen = False
             PLAYER_ACC = 0.5
             PLAYER_JSTR = -25

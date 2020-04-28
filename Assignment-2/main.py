@@ -31,6 +31,7 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
         self.playing = True
+        self.complete = False
         # Audio
         self.titleImage = pg.image.load("Uphill title.png")
         self.background = pg.image.load("BKG.png")
@@ -85,6 +86,7 @@ class Game:
 
     def new(self):
         global vec
+        self.complete = False
         # Music plays on loop
         self.level_music.play(-1)
         # starting postion for player
@@ -191,10 +193,12 @@ class Game:
             self.startotal += self.starcount
             if LEVEL < 5:
                 self.fadein(PURPLE)
-                self.completeScreen()
+                self.playing = False
+                self.complete = True
             else:
                 self.fadein(GREEN)
-                self.endScreen()
+                self.playing = False
+                self.complete = True
 
     def events(self):
         for event in pg.event.get():
@@ -338,14 +342,13 @@ class Game:
         self.draw_text("L/R Arrows to move, UP to jump", 22, WHITE, WIDTH / 2, HEIGHT / 2)
         self.draw_text("Space to DASH",22, WHITE, WIDTH/2, HEIGHT * 6 / 10)
         self.draw_text("Avoid the Snowflakes", 22, WHITE, WIDTH / 2, HEIGHT * 7 / 10)
-        self.draw_text("Press any key to play", 22, WHITE, WIDTH / 2, HEIGHT * 8 / 10)
-        self.draw_text("High Score: " + str(self.highscore), 22, WHITE, WIDTH / 2, HEIGHT * 9 / 10)
+        self.draw_text("Press any key to play", 22, GREY, WIDTH / 2, HEIGHT * 8 / 10)
+        self.draw_text("High Score: " + str(self.highscore), 22, PINK, WIDTH / 2, HEIGHT * 9 / 10)
         pg.display.flip()
         # wait for a key press to procced
         self.wait_for_key()
         self.fadein(WHITE)
         self.title_music.stop()
-        #self.fadeout()
 
     # on game over
     def overScreen(self):
@@ -361,15 +364,15 @@ class Game:
         self.screen.fill(BLUE)
         self.draw_text("GAME OVER", 48, WHITE, WIDTH / 2, HEIGHT / 4)
         self.draw_text("The penguin was buried in the snow", 22, WHITE, WIDTH / 2, HEIGHT * 5 / 10)
-        self.draw_text("Press a key to play again", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
         # if the total of stars collected is greater than highscore change it to the total
         if self.startotal > self.highscore:
             self.highscore = self.startotal
-            self.draw_text("NEW HIGH SCORE!", 22, RED, WIDTH / 2, HEIGHT * 5 / 6)
+            self.draw_text("NEW HIGH SCORE!", 22, RED, WIDTH / 2, HEIGHT * 6 / 10)
             with open(path.join(self.dir, HS_FILE), 'w') as f:
                 f.write(str(self.startotal))
         else:
-            self.draw_text("High Score: " + str(self.highscore), 22, WHITE, WIDTH / 2, HEIGHT * 5 / 6)
+            self.draw_text("High Score: " + str(self.highscore), 22, PINK, WIDTH / 2, HEIGHT * 7 / 10)
+        self.draw_text("Press a key to play again", 22, GREY, WIDTH / 2, HEIGHT * 8 / 10)
         pg.display.flip()
         self.startotal = 0
         pg.time.wait(500)
@@ -379,22 +382,25 @@ class Game:
     # on completing a level
     def completeScreen(self):
         global LEVEL
+        if not self.running:
+            return
         self.complete_music.play()
         self.screen.fill(PURPLE)
         self.draw_text("LEVEL COMPlETE", 48, WHITE, WIDTH / 2, HEIGHT / 4)
         self.draw_text("TOTAL STARS COLLECTED:" + str(self.startotal), 22, YELLOW, WIDTH / 2, HEIGHT / 2)
         self.draw_text("The penguin is closer to home", 22, WHITE, WIDTH / 2, HEIGHT * 6 / 10)
-        self.draw_text("Press any key to next level", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
+        self.draw_text("Press any key to next level", 22, GREY, WIDTH / 2, HEIGHT * 3 / 4)
         pg.display.flip()
         pg.time.wait(1000)
         self.wait_for_key()
         self.fadein(WHITE)
         self.complete_music.stop()
-        self.new()
 
     # on completing the game
     def endScreen(self):
         global LEVEL
+        if not self.running:
+            return
         LEVEL = 1
         self.complete_music.play()
         self.screen.fill(GREEN)
@@ -407,16 +413,13 @@ class Game:
             with open(path.join(self.dir, HS_FILE), 'w') as f:
                 f.write(str(self.startotal))
         else:
-            self.draw_text("High Score: " + str(self.highscore), 22, WHITE, WIDTH / 2, HEIGHT * 6 / 10)
-        self.draw_text("Press any key to return to the title", 22, WHITE, WIDTH / 2, HEIGHT * 7 / 10)
+            self.draw_text("High Score: " + str(self.highscore), 22, PINK, WIDTH / 2, HEIGHT * 6 / 10)
+        self.draw_text("Press any key to return to play again", 22, GREY, WIDTH / 2, HEIGHT * 7 / 10)
         pg.display.flip()
         pg.time.wait(1000)
         self.wait_for_key()
         self.fadein(WHITE)
         self.complete_music.stop()
-        self.startScreen()
-
-
 
     # game procceds on key press
     def wait_for_key(self):
@@ -425,8 +428,8 @@ class Game:
             self.clock.tick(60)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    self.running = False
                     waiting = False
+                    self.running = False
                 if event.type == pg.KEYDOWN:
                     waiting = False
 
@@ -448,7 +451,15 @@ g = Game()
 g.startScreen()
 while g.running:
     g.new()
-    g.overScreen()
+    # the game is not playing or complete
+    if not g.playing and not g.complete:
+        g.overScreen()
+    # the game is not playing but is complete, before level 5
+    elif not g.playing and g.complete and LEVEL < 5:
+        g.completeScreen()
+    # when level 5 is reached
+    elif not g.playing and g.complete and LEVEL >= 5:
+        g.endScreen()
 pg.quit()
 
 

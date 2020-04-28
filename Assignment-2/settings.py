@@ -20,16 +20,16 @@ SPRITESHEET = "SpriteSheet.png"
 RED = (255, 0, 0)
 PINK = (255, 0, 150)
 PURPLE = (255, 0, 255)
-YELLOW = (255, 200, 0)
+YELLOW = (255, 180, 0)
 BLUE = (0, 0, 255)
 CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
 GREY = (100, 100, 100)
 WHITE = (255, 255, 255)
-GREEN = (0, 255, 0)
+GREEN = (0, 230, 0)
 # Level
 LEVEL = 1
-# highscore file
+# highscore file (to reset change text file to 0)
 HS_FILE = "highscore"
 
 
